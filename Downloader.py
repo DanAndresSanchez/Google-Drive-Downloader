@@ -11,7 +11,8 @@ API_NAME = 'drive'
 API_VERSION = 'v3'
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
-service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
+global service
+service = None
 #response = service.files().list().execute()
 download_path = './Downloaded Files'
 original_path = './Downloaded Files'
@@ -19,6 +20,8 @@ total_size = 0
 
 
 def getDriveId():
+    global service
+    service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
     file_metadata = {
         'name': 'temporary folder - D3l3Te m#',
         'mimeType': 'application/vnd.google-apps.folder'
@@ -31,17 +34,23 @@ def getDriveId():
     return myDriveId
 
 
-def getFiles():
-    global drive_id
-    global download_path
-    global original_path
+def setPath(path):
+    global download_path, original_path
+    original_path = path
+    download_path = path
+
+
+def downloadDrive(path):
+    global drive_id, download_path, original_path, service
     drive_id = getDriveId()
-    downloadFolder('', drive_id, download_path)
-    os.rmdir(original_path + '/temporary folder')
+    setPath(path)
+    downloadFolder('', drive_id, download_path, service)
+    if os.path.isdir('/temporary folder'):
+        os.rmdir(original_path + '/temporary folder')
     print('Finished downloading the drive!')
 
 
-def downloadFile(file_id, file_name, file_type, path):
+def downloadFile(file_id, file_name, file_type, path, service):
     extention = ''
     if file_type == 'application/vnd.google-apps.document':
         # print('Google Doc')
@@ -81,7 +90,7 @@ def downloadFile(file_id, file_name, file_type, path):
         f.close()
 
 
-def downloadFolder(folder_name, folder_id, path):
+def downloadFolder(folder_name, folder_id, path, service):
     print(path + ':')
     global download_path
     global original_path
@@ -103,16 +112,13 @@ def downloadFolder(folder_name, folder_id, path):
                 item['name'], item['id'], item['mimeType']))
             if item['mimeType'] == 'application/vnd.google-apps.folder':
                 downloadFolder(item['name'], item['id'],
-                               download_path + '/' + item['name'])
+                               download_path + '/' + item['name'], service)
                 # Need to be able to come back out from folder to original place
                 # Maybe get root folder and recursivly call function for all files
             else:
                 # print(item['name'])
                 downloadFile(item['id'], item['name'],
-                             item['mimeType'], download_path)
+                             item['mimeType'], download_path, service)
         download_path = path.rsplit('/', 1)[0]
         if download_path == '.' or download_path == '' or download_path == '/':
             download_path = original_path
-
-
-getFiles()
