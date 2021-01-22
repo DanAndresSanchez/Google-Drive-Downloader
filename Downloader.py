@@ -44,7 +44,7 @@ def getDriveId():
     myDriveId = service.files().get(fileId=tempFolderId, fields='parents').execute()[
         "parents"][0]  # Get parent ID
     service.files().delete(fileId=tempFolderId).execute()  # Delete temporary folder
-    #folder_data = getSize(myDriveId, service)
+    folder_data = getSize(myDriveId, service)
     return myDriveId
 
 
