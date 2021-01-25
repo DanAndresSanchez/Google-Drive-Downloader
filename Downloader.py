@@ -32,6 +32,20 @@ global extension
 extension = ''
 
 
+def getFilesDownloaded():
+    global files_downloaded
+    return files_downloaded
+
+def getAmountDownloaded():
+    global amount_downloaded
+    return amount_downloaded
+
+def getFolderData():
+    global folder_data, files_downloaded
+    if folder_data is not None:
+        return files_downloaded / folder_data['files']
+    return -1
+
 def getDriveId():
     global service, folder_data
     service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)

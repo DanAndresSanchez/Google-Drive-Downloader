@@ -153,4 +153,6 @@ def getSize(LINKorID, service):
 
     if not calculate is None:
         print('\n')
+        for k, v in calculate.items():
+            print(f'{k.title()}:', v)
         return calculate
