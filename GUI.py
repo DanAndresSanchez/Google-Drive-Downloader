@@ -2,11 +2,12 @@ import sys
 import os
 import os.path
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication
+from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QLabel
 from PyQt5.uic import loadUi
-from Downloader import downloadDrive, getAmountDownloaded, getFilesDownloaded, getFolderData
+from Downloader import downloadDrive
 from PyQt5.QtCore import QTimer, QTime, Qt
 from qt_material import apply_stylesheet, list_themes
+from PyQt5.QtGui import QMovie
 
 
 class MainWindow(QDialog):
@@ -16,35 +17,24 @@ class MainWindow(QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi('GUI.ui', self)
+
+        label = QLabel(self)
+        label.setText("Window Title")
+        self.setWindowTitle("Window Title")
+
         self.browse.clicked.connect(self.browseFiles)
         self.download.clicked.connect(self.downloadClicked)
         self.signOutButton.clicked.connect(self.signOut)
 
-
-    
     def signOut(self):
         if os.path.isfile('token_drive_v3.pickle'):
-            os.remove('token_drive_v3.pickle') 
+            os.remove('token_drive_v3.pickle')
 
-
-    def updateProgressBar(self):
-        count = getFilesDownloaded()
-        size = getAmountDownloaded()
-        folder_data = getFolderData()
-        self.progressBar.setValue(count / folder_data)
-        if size > 1000000000:
-            self.progresBarLabel.setText(u'Downloaded {0} GBs'.format(round(size / 1000000000)))
-        else:
-            self.progresBarLabel.setText(u'Downloaded {0} MBs'.format(round(size / 1048576,2)))
-
-    
     def downloadClicked(self):
+        self.loadingGIFlabel.setText(
+            'Downloading drive ... this may take a while.')
         downloadDrive(path)
-        
-        # Call function every second to update progress bar
-        timer = QTimer(self)
-        timer.timeout.connect(self.updateProgressBar)
-        timer.start(1000)
+        self.loadingGIFlabel.setText('Finished downloading!')
 
     def browseFiles(self):
         global path
@@ -68,5 +58,6 @@ def window():
 
     widget.show()
     sys.exit(app.exec_())
+
 
 window()
